@@ -33,20 +33,14 @@ PACKAGE_URL=http://repo.mongodb.org/apt/ubuntu
 PACKAGE_NAME=mongodb-org
 MONGODB_PORT=27017
 
-DATA_DISKS="/datadisks"
-DATA_MOUNTPOINT="$DATA_DISKS/disk1"
+DATA_MOUNTPOINT="/var/lib"
 MONGODB_DATA="$DATA_MOUNTPOINT/mongodb"
 
 help()
 {
-	echo "This script installs MongoDB on the Ubuntu virtual machine image"
+	echo "This script configures MongoDB on the Ubuntu virtual machine image"
 	echo "Options:"
-	echo "		-n Replica set name"
-	echo "		-c Cluster role"
-	echo "      -p Replica ip prefix"
-	echo "		-m Replica member count"
-	echo "		-r Replica role"
-	echo "		-i Node ip address"	
+	echo "		-p Path for mongodb directory"
 }
 
 log()
@@ -66,25 +60,11 @@ then
 fi
 
 # Parse script parameters
-while getopts :n:c:p:m:r:i:h optname; do  
+while getopts :p:h optname; do  
 	case $optname in
-	n) # Replica set name
-		REPLICA_SET_NAME=${OPTARG}
-		;;
-	c) # Role in a cluster
-		CLUSTER_ROLE=${OPTARG}
 		;;
 	p) # Replica ip range prefix
-		IP_PREFIX=${OPTARG}
-		;;
-	m) # Replica member count
-		MEMBER_COUNT=${OPTARG}
-		;;
-	r) # Replica set role
-		REPLICA_ROLE=${OPTARG}
-		;;
-	i) # Installation package location
-		NODE_IP=${OPTARG}
+		DATA_MOUNTPOINT=${OPTARG}
 		;;
     h) # Helpful hints
 		help
@@ -97,15 +77,6 @@ while getopts :n:c:p:m:r:i:h optname; do
 		;;
   esac
 done
-
-#############################################################################
-configure_datadisks()
-{
-	# Stripe all of the data 
-	log "Formatting and configuring the data disks"
-	
-	bash ./vm-disk-utils-0.1.sh -b $DATA_DISKS -s
-}
 
 #############################################################################
 tune_memory()
@@ -201,48 +172,6 @@ EOF
 }
 
 #############################################################################
-initialize_replica()
-{
-	log "initialize replica from primary node"
-
-	# check for replica role
-	IS_CONFIGSVR="false"
-	if [ "$CLUSTER_ROLE" == "configsvr" ]; then
-	    IS_CONFIGSVR="true"
-    fi
-
-	NODE_IP_ADDR=$IP_PREFIX$NODE_IP
-
-	# initial replica with current member now
-	cfg="{
-		_id: '$REPLICA_SET_NAME',
-		configsvr: $IS_CONFIGSVR,
-		members: [
-			{_id: 1, host: '$NODE_IP_ADDR:$MONGODB_PORT'}
-		]
-	}"
-	mongo $NODE_IP_ADDR:$MONGODB_PORT --eval "printjson(rs.initiate($cfg))"
-
-	# add other members to replica set
-	for i in $(seq 2 $MEMBER_COUNT)
-	do
-        MEMBER_ADDR=$IP_PREFIX$i:$MONGODB_PORT
-        mongo $NODE_IP_ADDR:$MONGODB_PORT --eval "printjson(rs.add('$MEMBER_ADDR'))"
-	done
-}
-
-#############################################################################
-add_arbiter()
-{
-	log "Add arbiter to replica"
-
-	PRIMARY_NODE_IP=1
-	PRIMARY_ADDR=$IP_PREFIX$PRIMARY_NODE_IP
-	NODE_ADDR=$IP_PREFIX$NODE_IP:$MONGODB_PORT
-	mongo $PRIMARY_ADDR:$MONGODB_PORT --eval "printjson(rs.add('$NODE_ADDR', true))"
-}
-
-#############################################################################
 start_mongodb()
 {
 	log "Starting MongoDB daemon processes"
@@ -267,12 +196,11 @@ stop_mongodb()
 	sleep 15s	
 }
 
-#configure_datadisks
-#tune_memory
-#tune_system
-#install_mongodb
-stop_mongodb
+tune_memory
+tune_system
+install_mongodb
 configure_mongodb
+start_mongodb
 
 # Exit (proudly)
 exit 0
