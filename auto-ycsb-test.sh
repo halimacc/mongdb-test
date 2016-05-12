@@ -8,10 +8,13 @@ RECORD_COUNT=1000
 OPERATION_COUNT=1000
 THREADS=1
 
+OUTPUT="./result"
+
 help()
 {
   echo "This script helps you automatically test MongoDB with YCSB."
   echo "Options:"
+  echo "          -d Result directory, default will be $OUTPUT"
   echo "          -i MongoDB server ip address, default will be $MONGODB_IP"
   echo "          -p MongoDB server port, default will be $MONGODB_PORT"
   echo "          -d Test database name, default will be $DATABASE"
@@ -77,18 +80,26 @@ full_workload_test(){
   DB_URL=$MONGODB_IP:$MONGODB_PORT/$DATABASE
   MONGODB_CONN_STR=mongodb://$DB_URL?w=1
 
+  if [ ! -d "$OUTPUT" ]; then
+    mkdir -p $OUTPUT 
+  fi 
+
   mongo $DB_URL --eval "db.dropDatabase()"
-  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloada -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > outputLoadA.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workload1 -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > outputRunA.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadb -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > outputRunB.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadc -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > outputRunC.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadf -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > outputRunF.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadd -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > outputRunD.txt
-  mongo $DBURL --eval "db.dropDatabase()"
-  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > outputLoadE.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > outputRunE.txt
+  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloada -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > $OUTPUT/LoadA.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workload1 -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunA.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadb -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunB.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadc -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunC.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadf -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunF.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadd -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunD.txt
+  mongo $DB_URL --eval "db.dropDatabase()"
+  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > $OUTPUT/LoadE.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunE.txt
 }
 
 install_java
-install_ycsb
+
+if [ ! -d "ycsb" ]; then
+  install_ycsb
+fi
+
 full_workload_test
