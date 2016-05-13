@@ -1,4 +1,18 @@
 #!/bin/bash
+#
+#--------------------------------------------------------------------------------------------------
+# This script helps you automatically test MongoDB with YCSB. This script runs on Ubuntu, and will
+# install java and maven if they had not been installed. Test routine in this script follows YCSB
+# core workloads, at https://github.com/brianfrankcooper/YCSB/wiki/Core-Workloads.
+#
+# An example of test local MongoDB server with 32 thread, 1 million records and operations:
+#     bash auto-ycsb-test -i 127.0.0.1 -t 32 -r 1000000 -o 1000000
+# 
+# For more infomation about parameters, type:
+#     bash auto-ycsb-test -h
+#
+#----------------------------------------------------------------------------------------------
+
 
 MONGODB_IP="127.0.0.1"
 MONGODB_PORT=27017
@@ -14,37 +28,40 @@ help()
 {
   echo "This script helps you automatically test MongoDB with YCSB."
   echo "Options:"
-  echo "          -d Result directory, default will be $OUTPUT"
-  echo "          -i MongoDB server ip address, default will be $MONGODB_IP"
-  echo "          -p MongoDB server port, default will be $MONGODB_PORT"
-  echo "          -d Test database name, default will be $DATABASE"
-  echo "          -r Record count for YCSB workloads, default will be $RECORD_COUNT"
-  echo "          -o Operation count for YCSB workloads, default will be $OPERATION_COUNT"
-  echo "          -t Threads for YCSB workloads, default will be $THREADS"
+  echo "    -d Directory for test result, default will be $OUTPUT"
+  echo "    -i MongoDB server IP address, default will be $MONGODB_IP"
+  echo "    -n Test database name, default will be $DATABASE"
+  echo "    -o Operation count of YCSB workloads, default will be $OPERATION_COUNT"
+  echo "    -p MongoDB server port, default will be $MONGODB_PORT"
+  echo "    -r Record count of YCSB workloads, default will be $RECORD_COUNT"
+  echo "    -t Thread count of YCSB test client, default will be $THREADS"
 }
 
 # Parse script parameters
-while getopts :m:r:o:t:h optname; do  
+while getopts :d:i:n:o:p:r:t:h optname; do  
   case $optname in
-    i) # mongoDB ip
+    d) # Directory for test result
+      OUTPUT=${OPTARG}
+      ;;
+    i) # MongoDB server IP address
       MONGODB_IP=${OPTARG}
       ;;
-    p) # mongoDB port
-      MONGODB_PORT=${OPTARG}
-      ;;
-    d) # mongoDB database
+    n) # Test database name
       DATABASE=${OPTARG}
       ;;
-    r) # record count
-      RECORD_COUNT=${OPTARG}
-      ;;
-    o) # operation count
+    o) # Operation count
       OPERATION_COUNT=${OPTARG}
       ;;
-    t) # threads
+    p) # MongoDB server port
+      MONGODB_PORT=${OPTARG}
+      ;;
+    r) # Record count
+      RECORD_COUNT=${OPTARG}
+      ;;
+    t) # Threads
       THREADS=${OPTARG}
       ;;
-    h) # help
+    h) # Help
       help
       exit 2
       ;;
