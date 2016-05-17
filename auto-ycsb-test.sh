@@ -101,16 +101,16 @@ full_workload_test(){
     mkdir -p $OUTPUT 
   fi 
 
-  mongo $DB_URL --eval "db.dropDatabase()"
-  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloada -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > $OUTPUT/LoadA.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workload1 -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunA.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadb -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunB.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadc -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunC.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadf -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunF.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadd -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunD.txt
-  mongo $DB_URL --eval "db.dropDatabase()"
-  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > $OUTPUT/LoadE.txt
-  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/RunE.txt
+  mongo $DB_URL --eval "db.usertable.remove({})"
+  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloada -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > $OUTPUT/load_a.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workload1 -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/run_a.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadb -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/run_b.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadc -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/run_c.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadf -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/run_f.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloadd -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/run_d.txt
+  mongo $DB_URL --eval "db.usertable.remove({})"
+  ./ycsb/bin/ycsb load mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT > $OUTPUT/load_e.txt
+  ./ycsb/bin/ycsb run mongodb-async -s -P ycsb/workloads/workloade -threads $THREADS -p mongodb.url=$MONGODB_CONN_STR -p recordcount=$RECORD_COUNT -p operationcount=$OPERATION_COUNT > $OUTPUT/run_e.txt
 }
 
 install_java
