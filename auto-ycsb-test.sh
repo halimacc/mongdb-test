@@ -75,22 +75,41 @@ done
 
 install_java()
 {
-    sudo apt-get update
+    UPDATED=false
 
-    # install java
-    sudo apt-get install -y default-jre
-    sudo apt-get install -y default-jdk
+    # check and install java
+    if type -p java; then
+        echo Java installed
+    elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+        echo Java installed
+    else
+        echo No Java installation found, install Java
+        sudo apt-get update
+        UPDATED=true
+        sudo apt-get install -y default-jre
+        sudo apt-get install -y default-jdk
+    fi
 
-    # install maven
-    sudo apt-get install -y maven
+    # check and install maven
+    if type -p mvn; then
+        echo Maven installed
+    else
+        echo No Maven installation found, install Maven
+        if [ !UPDATED ]; then
+            sudo apt-get update
+        fi
+        sudo apt-get install -y maven
+    fi
 }
 
 install_ycsb()
 {
-    curl -O --location https://github.com/brianfrankcooper/YCSB/releases/download/0.8.0/ycsb-0.8.0.tar.gz
-    tar xfvz ycsb-0.8.0.tar.gz
-    rm ycsb-0.8.0.tar.gz
-    mv ycsb-0.8.0 ycsb
+    if [ ! -d ycsb ]; then
+        curl -O --location https://github.com/brianfrankcooper/YCSB/releases/download/0.8.0/ycsb-0.8.0.tar.gz
+        tar xfvz ycsb-0.8.0.tar.gz
+        rm ycsb-0.8.0.tar.gz
+        mv ycsb-0.8.0 ycsb
+    fi
 }
 
 full_workload_test(){
@@ -115,8 +134,6 @@ full_workload_test(){
 
 install_java
 
-if [ ! -d "ycsb" ]; then
-  install_ycsb
-fi
+install_ycsb
 
-full_workload_test
+#full_workload_test
